@@ -16,7 +16,7 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
 
     var running = false
     var sensorManager: SensorManager? = null
-    val steps = 0
+    var steps = 0
 
     // onCreate
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +43,7 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
         }
         else {
             sensorManager?.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI)
+            steps = loadData()
         }
     }
 
@@ -68,5 +69,12 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
         val editor = sharedPreferences.edit()
         editor.putInt("key", steps)
         editor.apply()
+    }
+
+    private fun loadData(): Int {
+        val sharedPreference = getSharedPreferences("steps", Context.MODE_PRIVATE)
+        val key = sharedPreference.getInt("key", 0)
+
+        return key
     }
 }

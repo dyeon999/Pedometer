@@ -20,16 +20,29 @@ class HomeFragment: Fragment() {
     ): View? {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        binding.homeStepCountTv.text = steps.toString()
+        binding.homeStepCountTv.text = loadData().toString()
+
+        binding.homeStepResetBt.setOnClickListener {
+            steps = 0
+            saveData()
+        }
 
         return binding.root
     }
 
-    private fun loadData(){
-        val sharedPreference = requireActivity().getSharedPreferences("steps", Context.MODE_PRIVATE)
-        val n = sharedPreference.getInt("key", 0)
+    private fun saveData(){
+        val sharedPreferences = requireActivity().getSharedPreferences("steps", Context.MODE_PRIVATE)
 
-        steps = n
+        val editor = sharedPreferences.edit()
+        editor.putInt("key", steps)
+        editor.apply()
+    }
+
+    private fun loadData(): Int {
+        val sharedPreference = requireActivity().getSharedPreferences("steps", Context.MODE_PRIVATE)
+        steps = sharedPreference.getInt("key", 0)
+
+        return steps
     }
 
 }
