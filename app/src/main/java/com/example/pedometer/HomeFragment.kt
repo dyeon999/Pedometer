@@ -2,6 +2,7 @@ package com.example.pedometer
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,7 @@ import com.example.pedometer.databinding.FragmentHomeBinding
 class HomeFragment: Fragment() {
     lateinit var binding: FragmentHomeBinding
 
-    var steps = 0
+    var steps = 0f
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,7 +24,7 @@ class HomeFragment: Fragment() {
         binding.homeStepCountTv.text = loadData().toString()
 
         binding.homeStepResetBt.setOnClickListener {
-            steps = 0
+            steps = 0f
             saveData()
         }
 
@@ -34,13 +35,15 @@ class HomeFragment: Fragment() {
         val sharedPreferences = requireActivity().getSharedPreferences("steps", Context.MODE_PRIVATE)
 
         val editor = sharedPreferences.edit()
-        editor.putInt("key", steps)
+        editor.putFloat("key", steps)
         editor.apply()
     }
 
-    private fun loadData(): Int {
+    private fun loadData(): Float {
         val sharedPreference = requireActivity().getSharedPreferences("steps", Context.MODE_PRIVATE)
-        steps = sharedPreference.getInt("key", 0)
+        steps = sharedPreference.getFloat("key", 0f)
+
+        Log.d("STEP : ", steps.toString())
 
         return steps
     }

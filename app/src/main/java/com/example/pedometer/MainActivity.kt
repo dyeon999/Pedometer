@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.pedometer.databinding.ActivityMainBinding
@@ -16,17 +17,23 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
 
     var running = false
     var sensorManager: SensorManager? = null
-    var steps = 0
+    var steps = 0f
 
     // onCreate
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        this.supportFragmentManager.beginTransaction()
-            .replace(R.id. main_frm, HomeFragment()).commitAllowingStateLoss()
+//        this.supportFragmentManager.beginTransaction()
+//            .replace(R.id. main_frm, HomeFragment()).commitAllowingStateLoss()
 
         setContentView(R.layout.activity_main)
+
+        binding.mainStepCountTv.text = loadData().toString()
+        binding.mainStepResetBt.setOnClickListener {
+            resetData()
+            binding.mainStepCountTv.text = 0.toString()
+        }
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
@@ -42,8 +49,7 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
             Toast.makeText(this, "No Step Counter Sensor !", Toast.LENGTH_SHORT).show()
         }
         else {
-            sensorManager?.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI)
-            steps = loadData()
+            sensorManager?.registerListener(this, stepSensor, SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM)
         }
     }
 
@@ -53,8 +59,9 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
         sensorManager?.unregisterListener(this)
     }
 
-    override fun onSensorChanged(p0: SensorEvent?) {
+    override fun onSensorChanged(event: SensorEvent) {
         if (running){
+            steps = event.values[0]
             saveData()
         }
     }
@@ -67,14 +74,20 @@ class MainActivity: AppCompatActivity(), SensorEventListener {
         val sharedPreferences = getSharedPreferences("steps", Context.MODE_PRIVATE)
 
         val editor = sharedPreferences.edit()
-        editor.putInt("key", steps)
+        editor.putFloat("key", steps)
         editor.apply()
     }
 
-    private fun loadData(): Int {
+    private fun loadData(): Float {
         val sharedPreference = getSharedPreferences("steps", Context.MODE_PRIVATE)
-        val key = sharedPreference.getInt("key", 0)
+        val key = sharedPreference.getFloat("key", 0f)
+
+        Log.d("MAIN STEPS ", key.toString())
 
         return key
+    }
+
+    private fun resetData() {
+        steps = 0f
     }
 }
